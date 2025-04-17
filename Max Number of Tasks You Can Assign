@@ -1,0 +1,43 @@
+class Solution {
+public:
+    bool canAssign(int k, vector<int>& tasks, vector<int>& workers, int pills, int strength) {
+        multiset<int> available(workers.end() - k, workers.end());
+
+        for (int i = k - 1; i >= 0; --i) {
+            int task = tasks[i];
+
+            // Try without pill
+            auto it = prev(available.end());
+            if (*it >= task) {
+                available.erase(it);
+            } else {
+                // Try with pill
+                auto pillIt = available.lower_bound(task - strength);
+                if (pillIt == available.end() || pills == 0) return false;
+                available.erase(pillIt);
+                --pills;
+            }
+        }
+
+        return true;
+    }
+
+    int maxTaskAssign(vector<int>& tasks, vector<int>& workers, int pills, int strength) {
+        sort(tasks.begin(), tasks.end());
+        sort(workers.begin(), workers.end());
+
+        int low = 0, high = min((int)tasks.size(), (int)workers.size()), ans = 0;
+
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (canAssign(mid, tasks, workers, pills, strength)) {
+                ans = mid;
+                low = mid + 1;
+            } else {
+                high = mid - 1;
+            }
+        }
+
+        return ans;
+    }
+};
